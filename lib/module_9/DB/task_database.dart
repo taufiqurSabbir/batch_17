@@ -30,6 +30,4 @@ class TaskDatabase {
     return List.generate(maps.length, (i) => Task.formMap(maps[i]));
   }
 
-
-
 }
