@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'module_10/class_1.dart';
 import 'module_9/ui/task_home_page.dart';
 
 class MyApp extends StatelessWidget {
@@ -8,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: TaskHomePage(),
+      home: Module10Class1(),
     );
   }
 }
