@@ -22,4 +22,53 @@ class ProductController {
       products = model.data ?? [];
     }
   }
+
+
+  Future<bool> deleteProduct(String productID) async {
+    isLoding = true;
+    final response = await http.get(Uri.parse(Urls.deleteProduct(productID)));
+    print(response.body);
+    isLoding = false;
+    if(response.statusCode == 200){
+
+     return true;
+    }else{
+      return false;
+    }
+  }
+
+
+  Future<bool> createProducts(Data data) async {
+    isLoding = true;
+
+
+    final response = await http.post(Uri.parse(Urls.createProduct),
+
+    headers: {
+      'Content-Type' : 'application/json'
+    },
+
+    body: jsonEncode({
+
+        "ProductName": data.productName,
+        "ProductCode": DateTime.now().microsecondsSinceEpoch,
+        "Img": data.img,
+        "Qty": data.qty,
+        "UnitPrice": data.unitPrice,
+        "TotalPrice": data.totalPrice
+
+    })
+    );
+
+
+
+    isLoding = false;
+    print(response.body);
+    if(response.statusCode == 200){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
 }
