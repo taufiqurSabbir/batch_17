@@ -1,9 +1,17 @@
+import 'dart:convert';
+
+import 'package:batch_17/task_manager/controller/auth_controller.dart';
+import 'package:batch_17/task_manager/data/model/user_model.dart';
 import 'package:batch_17/task_manager/screens/main_nav_screen.dart';
 import 'package:batch_17/task_manager/screens/sign_up_screen.dart';
 import 'package:batch_17/task_manager/utils/app_colors.dart';
 import 'package:batch_17/task_manager/widget/screen_bg.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import '../data/model/api_response.dart';
+import '../data/service/api_caller.dart';
+import '../utils/urls.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +21,40 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future<void>signIn() async {
+
+
+
+
+    final ApiResponse response = await ApiCaller.PostRequest(url: TMUrls.SignInURL,
+        body: {
+          "email":emailController.text,
+          "password":passwordController.text,
+        }
+
+    );
+
+
+    if(response.isSuccess){
+      UserModel model = UserModel.fromJson(response.responseData['data']);
+
+      String accessToken = response.responseData['token'];
+      AuthController.saveUserData(model, accessToken);
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MainNavScreen()));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign In success....!')));
+
+
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.responseData['data'])));
+
+    }
+  }
+
 
   void onTapSignUp(){
     Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
@@ -30,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Text('Get Started With', style: Theme.of(context).textTheme.titleLarge,),
             SizedBox(height: 25,),
             TextFormField(
+              controller: emailController,
               decoration: InputDecoration(
                 hintText: 'Email'
               ),
@@ -37,13 +80,14 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 10,),
 
             TextFormField(
+              controller: passwordController,
               decoration: InputDecoration(
                   hintText: 'Password'
               ),
             ),
 
             FilledButton(onPressed: (){
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MainNavScreen()));
+              signIn();
             }, child: Icon(Icons.arrow_circle_right_outlined,size: 25,)),
 
             SizedBox(height: 35,),

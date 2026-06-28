@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:batch_17/task_manager/data/model/api_response.dart';
+import 'package:batch_17/task_manager/data/service/api_caller.dart';
+import 'package:batch_17/task_manager/utils/urls.dart';
 import 'package:flutter/material.dart';
 
+import '../data/model/task_status_count_model.dart';
 import '../widget/task_count_by_status.dart';
 
 class NewTaskScreen extends StatefulWidget {
@@ -10,6 +16,41 @@ class NewTaskScreen extends StatefulWidget {
 }
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAllTaskCount();
+  }
+
+  List<TaskStatusCountModel> taskCount = [];
+
+
+  Future<void> getAllTaskCount() async {
+    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskCountURL);
+
+    List<TaskStatusCountModel> taskC = [];
+
+
+    if(response.isSuccess){
+      for(Map<String , dynamic>jsonData in (response.responseData['data'])){
+        taskC.add(TaskStatusCountModel.fromJson(jsonData));
+      }
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
+
+    }
+
+
+    setState(() {
+      taskCount = taskC;
+    });
+
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,9 +63,10 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
               height: 90,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: 4,
+                itemCount: taskCount.length,
                   itemBuilder: (context, index){
-                return TaskCountByStatus(title: 'New', count: 20,);
+                  final Tcount = taskCount[index];
+                return TaskCountByStatus(title: Tcount.sId.toString(), count: Tcount.sum!.toInt(),);
 
 
               }, separatorBuilder: (BuildContext context, int index) {
