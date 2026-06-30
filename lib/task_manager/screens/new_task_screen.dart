@@ -5,8 +5,11 @@ import 'package:batch_17/task_manager/data/service/api_caller.dart';
 import 'package:batch_17/task_manager/utils/urls.dart';
 import 'package:flutter/material.dart';
 
+import '../data/model/task_model.dart';
 import '../data/model/task_status_count_model.dart';
+import '../widget/task_card.dart';
 import '../widget/task_count_by_status.dart';
+import 'add_new_task_screen.dart';
 
 class NewTaskScreen extends StatefulWidget {
   const NewTaskScreen({super.key});
@@ -22,6 +25,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     // TODO: implement initState
     super.initState();
     getAllTaskCount();
+    getAllTask();
   }
 
   List<TaskStatusCountModel> taskCount = [];
@@ -49,6 +53,30 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
 
   }
 
+
+List<TaskModel>tasks = [];
+
+  Future<void> getAllTask() async {
+    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL('New'));
+
+    List<TaskModel> task = [];
+
+
+    if(response.isSuccess){
+      for(Map<String , dynamic>jsonData in (response.responseData['data'])){
+        task.add(TaskModel.fromJson(jsonData));
+      }
+    }else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
+
+    }
+
+
+    setState(() {
+      tasks = task;
+    });
+
+  }
 
 
   @override
@@ -78,49 +106,25 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
           
           Expanded(
             child: ListView.builder(
-                itemCount: 15,
+                itemCount: tasks.length,
                 itemBuilder: (context,index){
-                  return ListTile(
-                    title: Text('Task-1${index}',style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      fontSize: 18
-                    ),),
-
-
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy'),
-                        Text('Date: 20-10-2000'),
-                        Row(
-                          children: [
-                            Chip(label: Text('New'),
-                            backgroundColor: Colors.blue,
-                              labelStyle: TextStyle(
-                                color: Colors.white
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25)
-                              ),
-                            ),
-
-                          Spacer(),
-
-
-                            IconButton(onPressed: (){}, icon: Icon(Icons.edit_note, color: Colors.orange,)),
-                            IconButton(onPressed: (){}, icon: Icon(Icons.delete, color: Colors.red,)),
-
-                          ],
-                        )
-                      ],
-                    ),
-                  );
+                  final task = tasks[index];
+                  return TaskCard(taskModel: task, CardColor: Colors.blue, refreshParent: () async {
+                  await  getAllTaskCount();
+                   await getAllTask();
+                  },);
                 }),
           )
 
 
         ],
       ),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddNewTaskScreen()));
+
+      },child: Icon(Icons.add),),
     );
   }
 }
+
 
