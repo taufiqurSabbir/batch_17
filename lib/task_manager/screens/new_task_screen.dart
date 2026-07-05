@@ -31,16 +31,41 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   List<TaskStatusCountModel> taskCount = [];
 
 
+
+
   Future<void> getAllTaskCount() async {
     final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskCountURL);
 
     List<TaskStatusCountModel> taskC = [];
 
 
+
     if(response.isSuccess){
       for(Map<String , dynamic>jsonData in (response.responseData['data'])){
         taskC.add(TaskStatusCountModel.fromJson(jsonData));
       }
+
+      taskC.removeWhere((e)=>e.sId == null);
+      //
+      //
+      // const statusOrder = [
+      //   'New',
+      //   'Progress',
+      //   'Completed',
+      //   'Cancelled'
+      // ];
+      //
+      // taskC.sort((a,b){
+      //   final indexA = statusOrder.indexOf(a.sId ?? '');
+      //   final indexB = statusOrder.indexOf(b.sId ?? '');
+      //
+      //   return (indexA == -1 ? statusOrder.length : indexA)
+      //       .compareTo(indexB == -1 ? statusOrder.length : indexB);
+      //
+      //
+      // });
+
+
     }else{
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
 
@@ -79,8 +104,15 @@ List<TaskModel>tasks = [];
   }
 
 
+
   @override
   Widget build(BuildContext context) {
+    List<String> statusOrder = [
+      'New',
+      'Progress',
+      'Completed',
+      'Cancelled'
+    ];
     return Scaffold(
       body: Column(
 
@@ -91,10 +123,17 @@ List<TaskModel>tasks = [];
               height: 90,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: taskCount.length,
+                itemCount: statusOrder.length,
+
                   itemBuilder: (context, index){
-                  final Tcount = taskCount[index];
-                return TaskCountByStatus(title: Tcount.sId.toString(), count: Tcount.sum!.toInt(),);
+
+                    final status = statusOrder[index];
+
+                    final task = taskCount.firstWhere((e)=>e.sId == status, orElse: ()=> TaskStatusCountModel(
+                      sId: status,
+                      sum: 0
+                    ));
+                return TaskCountByStatus(title: task.sId.toString(), count: task.sum ?? 0,);
 
 
               }, separatorBuilder: (BuildContext context, int index) {

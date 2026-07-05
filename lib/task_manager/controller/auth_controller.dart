@@ -51,4 +51,12 @@ static Future getUserData() async {
 
   }
 
+
+  static Future<void> updateUserData(UserModel user) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    sharedPreferences.setString('user-data', jsonEncode(user.toJson()));
+
+  }
+
 }
