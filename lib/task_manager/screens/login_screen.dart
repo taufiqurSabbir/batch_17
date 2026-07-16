@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:batch_17/task_manager/controller/auth_controller.dart';
 import 'package:batch_17/task_manager/data/model/user_model.dart';
+import 'package:batch_17/task_manager/providers/auth_provider.dart';
 import 'package:batch_17/task_manager/screens/main_nav_screen.dart';
 import 'package:batch_17/task_manager/screens/sign_up_screen.dart';
 import 'package:batch_17/task_manager/utils/app_colors.dart';
 import 'package:batch_17/task_manager/widget/screen_bg.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../data/model/api_response.dart';
 import '../data/service/api_caller.dart';
@@ -25,35 +27,25 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  Future<void>signIn() async {
+Future<void>signIn()async{
+  final authProvider = Provider.of<AuthProvider>(context,listen: false);
 
+  bool login = await authProvider.signIn(emailController.text, passwordController.text);
 
-
-
-    final ApiResponse response = await ApiCaller.PostRequest(url: TMUrls.SignInURL,
-        body: {
-          "email":emailController.text,
-          "password":passwordController.text,
-        }
-
+  if(login){
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const MainNavScreen()),
     );
-
-
-    if(response.isSuccess){
-      UserModel model = UserModel.fromJson(response.responseData['data']);
-
-      String accessToken = response.responseData['token'];
-      AuthController.saveUserData(model, accessToken);
-
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MainNavScreen()));
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign In success....!')));
-
-
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.responseData['data'])));
-
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sign In success....!')),
+    );
+  }else{
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(authProvider.errorMessage ?? 'Sign In failed!')),
+    );
   }
+}
 
 
   void onTapSignUp(){
