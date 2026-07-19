@@ -28,39 +28,12 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     super.initState();
    final taskProvider = Provider.of<TaskProvider>(context,listen: false);
    taskProvider.getAllTaskCount();
+   taskProvider.getTaskByStatus('New');
   }
 
-  List<TaskStatusCountModel> taskCount = [];
 
 
 
-
-
-
-
-List<TaskModel>tasks = [];
-
-  Future<void> getAllTask() async {
-    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL('New'));
-
-    List<TaskModel> task = [];
-
-
-    if(response.isSuccess){
-      for(Map<String , dynamic>jsonData in (response.responseData['data'])){
-        task.add(TaskModel.fromJson(jsonData));
-      }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
-
-    }
-
-
-    setState(() {
-      tasks = task;
-    });
-
-  }
 
 
 
@@ -106,15 +79,16 @@ List<TaskModel>tasks = [];
                   },),
                 ),
               ),
-              
-              
-              Expanded(
+
+
+              taskProvider.isLoading ? Center(child: CircularProgressIndicator()) :     Expanded(
                 child: ListView.builder(
-                    itemCount: tasks.length,
+                    itemCount: taskProvider.newTask.length,
                     itemBuilder: (context,index){
-                      final task = tasks[index];
-                      return TaskCard(taskModel: task, CardColor: Colors.blue, refreshParent: () async {
-                       await getAllTask();
+                      final task = taskProvider.newTask[index];
+                      return  TaskCard(taskModel: task, CardColor: Colors.blue, refreshParent: () async {
+                       await taskProvider.getTaskByStatus('New');
+                       await taskProvider.getAllTaskCount();
                       },);
                     }),
               )

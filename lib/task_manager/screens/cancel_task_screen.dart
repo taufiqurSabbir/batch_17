@@ -1,11 +1,8 @@
-import 'dart:convert';
+
 
 import 'package:flutter/material.dart';
-
-import '../data/model/api_response.dart';
-import '../data/model/task_model.dart';
-import '../data/service/api_caller.dart';
-import '../utils/urls.dart';
+import 'package:provider/provider.dart';
+import '../providers/task_provider.dart';
 import '../widget/task_card.dart';
 
 class CancelTaskScreen extends StatefulWidget {
@@ -17,55 +14,41 @@ class CancelTaskScreen extends StatefulWidget {
 
 class _CancelTaskScreenState extends State<CancelTaskScreen> {
 
-  List<TaskModel>tasks = [];
-
-  Future<void> getAllTask() async {
-    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL('Cancelled'));
-
-    List<TaskModel> task = [];
-
-
-    if(response.isSuccess){
-      for(Map<String , dynamic>jsonData in (response.responseData['data'])){
-        task.add(TaskModel.fromJson(jsonData));
-      }
-    }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(jsonDecode(response.responseData['data']))));
-
-    }
-
-
-    setState(() {
-      tasks = task;
-    });
-
-  }
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getAllTask();
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      final taskProvider = Provider.of<TaskProvider>(context,listen: false);
+      taskProvider.getTaskByStatus('Cancelled');
+    });
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Consumer<TaskProvider>(
+          builder: (context,taskProvider,child) {
+            return Column(
 
-        children: [
-          Expanded(
-            child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context,index){
-                  final task = tasks[index];
-                  return TaskCard(taskModel: task, CardColor: Colors.red, refreshParent: () async {
-                    await getAllTask();
-                  },);
-                }),
-          )
+              children: [
+             taskProvider.isLoading ? Center(child: CircularProgressIndicator(),) :  Expanded(
+                  child: ListView.builder(
+                      itemCount: taskProvider.cancelledTask.length,
+                      itemBuilder: (context,index){
+                        final task = taskProvider.cancelledTask[index];
+                        return TaskCard(taskModel: task, CardColor: Colors.blue, refreshParent: () async {
+                          await taskProvider.getTaskByStatus('Cancelled');
+                          await taskProvider.getAllTaskCount();
+                        },);
+                      }),
+                )
 
 
-        ],
+              ],
+            );
+          }
       ),
     );
   }

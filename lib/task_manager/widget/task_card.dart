@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:batch_17/task_manager/providers/task_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../data/model/api_response.dart';
 import '../data/model/task_model.dart';
@@ -23,17 +25,19 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
 
   Future<void> changeStatus(String Status) async {
-    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.updateTaskStatusURL(widget.taskModel.sId.toString(),Status));
+    final taskProvider =Provider.of<TaskProvider>(context,listen: false);
+
+    bool statusChange =await taskProvider.changeTaskStatus(widget.taskModel.sId.toString(),Status);
 
 
 
-    if(response.isSuccess){
+    if(statusChange){
       widget.refreshParent();
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Task updated successfully')));
 
     }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.responseData['data'])));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Something wrong...!')));
 
     }
     Navigator.pop(context);
@@ -109,16 +113,18 @@ class _TaskCardState extends State<TaskCard> {
 
 
   Future<void> deleteTask() async {
-    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.deleteTaskURL(widget.taskModel.sId.toString()));
+   final taskProvider =Provider.of<TaskProvider>(context,listen: false);
+
+   bool isDelete =await taskProvider.deleteTask(widget.taskModel.sId.toString());
 
 
 
-    if(response.isSuccess){
+    if(isDelete){
       widget.refreshParent();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Task deleted successfully')));
 
     }else{
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.responseData['data'])));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Something wrong....!')));
 
     }
 

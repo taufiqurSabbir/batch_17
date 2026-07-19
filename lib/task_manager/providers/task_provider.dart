@@ -43,11 +43,93 @@ class TaskProvider extends ChangeNotifier{
       setLoading(false);
 
 
+    }
+
+
+  }
+
+
+  Future<void>getTaskByStatus(String status) async {
+    setLoading(true);
+
+    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.getTaskByStatusURL(status));
+
+
+
+
+    if(response.isSuccess){
+      List<TaskModel> task = [];
+      for(Map<String , dynamic>jsonData in (response.responseData['data'])){
+        task.add(TaskModel.fromJson(jsonData));
+      }
+      updateTaskList(status, task);
+    }
+
+
+
+    setLoading(false);
+
+
+  }
+
+
+
+  Future<bool> deleteTask(String taskId) async {
+    setLoading(true);
+    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.deleteTaskURL(taskId));
+    setLoading(false);
+
+
+    if(response.isSuccess){
+    return true;
+
+    }else{
+      return false;
+    }
+
+  }
+
+
+  Future<bool> changeTaskStatus(String taskId , String Status) async {
+    setLoading(true);
+    final ApiResponse response = await ApiCaller.getRequest(url: TMUrls.updateTaskStatusURL(taskId,Status));
+    setLoading(false);
+
+
+    if(response.isSuccess){
+    return true;
+
+    }else{
+     return false;
 
     }
 
 
   }
+
+
+
+  void updateTaskList(String status, List<TaskModel>taskList){
+    switch(status){
+      case 'New':
+        newTask = taskList;
+        break;
+      case 'Progress':
+        progressTask = taskList;
+        break;
+      case 'Completed':
+        completeTask = taskList;
+        break;
+
+      case 'Cancelled':
+        cancelledTask = taskList;
+        break;
+    }
+    notifyListeners();
+  }
+
+
+
 
 
 }
