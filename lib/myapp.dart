@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'module_10/class_1.dart';
 import 'module_10/crud/crud.dart';
+import 'module_16/score_page.dart';
 import 'module_9/ui/task_home_page.dart';
 
 class MyApp extends StatelessWidget {
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
             )
         ),
 
-        home: SplashScreen(),
+        home: ScorePage(),
       ),
 
 

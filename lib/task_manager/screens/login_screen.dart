@@ -5,6 +5,7 @@ import 'package:batch_17/task_manager/data/model/user_model.dart';
 import 'package:batch_17/task_manager/providers/auth_provider.dart';
 import 'package:batch_17/task_manager/screens/main_nav_screen.dart';
 import 'package:batch_17/task_manager/screens/sign_up_screen.dart';
+import 'package:batch_17/task_manager/screens/firebase_social_login_screen.dart';
 import 'package:batch_17/task_manager/utils/app_colors.dart';
 import 'package:batch_17/task_manager/widget/screen_bg.dart';
 import 'package:flutter/gestures.dart';
@@ -82,7 +83,33 @@ Future<void>signIn()async{
               signIn();
             }, child: Icon(Icons.arrow_circle_right_outlined,size: 25,)),
 
-            SizedBox(height: 35,),
+            const SizedBox(height: 16,),
+
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FirebaseSocialLoginScreen()),
+                );
+              },
+              icon: const Icon(Icons.lock_person, color: Colors.blueAccent),
+              label: const Text(
+                'Continue with Firebase Social Login',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                side: const BorderSide(color: Colors.blueAccent, width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24,),
 
             Center(
               child: Column(
